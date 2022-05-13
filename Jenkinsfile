@@ -43,12 +43,21 @@ node('mac') {
 
 //parallel integration testing
 stage 'Browser Testing'
+
+//parallel chrome: {
+//    runTests("Chrome")
+//}, firefox: {
+//    runTests("Firefox")
+//}, safari: {
+//    runTests("Safari")
+//}
+
 parallel chrome: {
-    runTests("Chrome")
-}, firefox: {
-    runTests("Firefox")
-}, safari: {
-    runTests("Safari")
+    node {
+        sh "echo 'Chrome is not available'"    
+    }
+}, phantomjs: {
+    runTests("PhantomJS")    
 }
 
 def runTests(browser) {
@@ -66,16 +75,17 @@ def runTests(browser) {
     }
 }
 
-node {
-    notify("Deploy to staging?")
-}
+//node {
+//    notify("Deploy to staging?")
+//}
 
-input 'Deploy to staging?'
+//input 'Deploy to staging?'
 
 // limit concurrency so we don't perform simultaneous deploys
 // and if multiple pipelines are executing, 
 // newest is only that will be allowed through, rest will be canceled
 stage name: 'Deploy to staging', concurrency: 1
+
 node {
     // write build number to index page so we can see this update
     // on windows use: bat "echo '<h1>${env.BUILD_DISPLAY_NAME}</h1>' >> app/index.html"
@@ -83,19 +93,10 @@ node {
     
     // deploy to a docker container mapped to port 3000
     // on windows use: bat 'docker-compose up -d --build'
-    sh 'docker-compose up -d --build'
+    //sh 'sudo docker-compose up -d --build'
     
-    notify 'Solitaire Deployed!'
+    //notify 'Solitaire Deployed!'
 }
-
-
-
-
-
-
-
-
-
 
 
 def notify(status){
